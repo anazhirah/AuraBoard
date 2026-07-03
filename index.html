@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraBoards - Visual Community</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen">
+
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-900 text-white p-2 rounded-xl shadow-md flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                </div>
+                <h1 class="text-xl font-extrabold tracking-tight text-slate-900">AuraBoards</h1>
+            </div>
+            
+            <div id="nav-user-controls" class="flex items-center gap-4 hidden">
+                <span id="nav-username" class="text-sm font-bold text-slate-600 hidden md:block"></span>
+                <button id="createPinBtn" onclick="openPostModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-full transition shadow-md text-sm flex items-center gap-2">
+                    <span>+</span> Create Pin
+                </button>
+                <button onclick="logout()" class="text-xs font-bold text-slate-500 hover:text-rose-600 transition">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="authView" class="min-h-[85vh] flex items-center justify-center p-6 bg-gradient-to-br from-slate-100 to-indigo-50">
+        <div class="bg-white p-8 rounded-3xl shadow-xl max-w-sm w-full border border-slate-100">
+            
+            <div class="flex justify-between border-b border-slate-200 mb-6 pb-2">
+                <button onclick="switchAuthTab('login')" id="tab-login" class="text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 px-2 pb-1 transition">Login</button>
+                <button onclick="switchAuthTab('register')" id="tab-register" class="text-sm font-bold text-slate-400 hover:text-slate-600 px-2 pb-1 transition">Register</button>
+                <button onclick="switchAuthTab('admin')" id="tab-admin" class="text-sm font-bold text-slate-400 hover:text-slate-600 px-2 pb-1 transition">Admin</button>
+            </div>
+
+            <div id="authError" class="hidden bg-rose-100 text-rose-600 text-xs font-bold px-3 py-2 rounded-lg mb-4 text-center"></div>
+
+            <form id="form-login" onsubmit="handleAuth(event, 'login')" class="space-y-4">
+                <h2 class="text-xl font-extrabold text-slate-900 mb-4">Welcome Back</h2>
+                <input type="text" id="loginUser" required placeholder="Username" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                <input type="password" id="loginPass" required placeholder="Password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                <button type="submit" id="btnLogin" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-md">Sign In</button>
+            </form>
+
+            <form id="form-register" onsubmit="handleAuth(event, 'register')" class="space-y-4 hidden">
+                <h2 class="text-xl font-extrabold text-slate-900 mb-4">Create Account</h2>
+                <input type="text" id="regUser" required placeholder="Choose a Username" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                <input type="password" id="regPass" required placeholder="Create Password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                <button type="submit" id="btnRegister" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition shadow-md">Join Community</button>
+            </form>
+
+            <form id="form-admin" onsubmit="handleAuth(event, 'admin')" class="space-y-4 hidden">
+                <h2 class="text-xl font-extrabold text-slate-900 mb-4">Admin Portal</h2>
+                <input type="text" id="adminUser" required placeholder="Admin ID" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                <input type="password" id="adminPass" required placeholder="Admin Password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                <button type="submit" id="btnAdmin" class="w-full bg-rose-600 text-white font-bold py-3 rounded-xl hover:bg-rose-700 transition shadow-md">Access System</button>
+            </form>
+        </div>
+    </div>
+
+    <main id="appView" class="max-w-7xl mx-auto px-4 py-8 hidden">
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+            
+            <div class="w-full lg:w-1/5 sticky top-24 hidden lg:block">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">System Status</h3>
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex items-center gap-3 mb-6">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-xs font-bold text-emerald-700">Cloud Sync Active</span>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-4/5 columns-1 sm:columns-2 md:columns-3 gap-6" id="masonryGrid">
+                </div>
+        </div>
+    </main>
+
+    <div id="postModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transform transition-transform">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-extrabold text-slate-800">Create New Pin</h3>
+                <button onclick="closePostModal()" class="text-slate-400 hover:text-rose-500 font-bold text-xl">&times;</button>
+            </div>
+            
+            <form onsubmit="handlePostSubmit(event)" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Image Upload</label>
+                    <div class="flex items-center justify-center w-full">
+                        <label class="flex flex-col items-center justify-center w-full h-48 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <p class="mb-2 text-sm text-slate-500 font-semibold"><span class="text-indigo-600">Click to upload</span> or drag and drop</p>
+                            </div>
+                            <input id="postImage" type="file" accept="image/*" class="hidden" required onchange="previewImage(event)" />
+                        </label>
+                    </div>
+                    <img id="imagePreview" class="hidden w-full h-48 object-cover rounded-xl mt-3 border border-slate-200">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Caption / Question</label>
+                    <textarea id="postTitle" required rows="3" placeholder="What do you want to share with the community?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition shadow-md">
+                    Publish to Board
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // ==========================================
+        // 1. UI & BUTTON LOGIC (Loads First!)
+        // ==========================================
+        window.switchAuthTab = switchAuthTab;
+        window.handleAuth = handleAuth;
+        window.logout = logout;
+        window.openPostModal = openPostModal;
+        window.closePostModal = closePostModal;
+        window.previewImage = previewImage;
+        window.handlePostSubmit = handlePostSubmit;
+        window.vote = vote;
+        window.deletePost = deletePost;
+
+        let currentUser = localStorage.getItem('auraCurrentUsername') || null;
+        let currentRole = localStorage.getItem('auraUserRole') || 'user'; 
+
+        if(currentUser) { showApp(); } else { showAuth(); }
+
+        function switchAuthTab(tab) {
+            ['login', 'register', 'admin'].forEach(t => {
+                document.getElementById(`form-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = 'text-sm font-bold text-slate-400 hover:text-slate-600 px-2 pb-1 transition';
+            });
+            document.getElementById(`form-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).className = 'text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 px-2 pb-1 transition';
+            document.getElementById('authError').classList.add('hidden');
+        }
+
+        function showApp() {
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+            document.getElementById('nav-user-controls').classList.remove('hidden');
+            
+            if (currentRole === 'admin') {
+                document.getElementById('nav-username').innerText = `🛡️ Admin Panel`;
+                document.getElementById('createPinBtn').classList.add('hidden'); 
+            } else {
+                document.getElementById('nav-username').innerText = `@${currentUser}`;
+                document.getElementById('createPinBtn').classList.remove('hidden');
+            }
+        }
+
+        function showAuth() {
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('appView').classList.add('hidden');
+            document.getElementById('nav-user-controls').classList.add('hidden');
+        }
+
+        function openPostModal() { document.getElementById('postModal').classList.remove('hidden'); document.getElementById('postModal').classList.add('flex'); }
+        function closePostModal() { document.getElementById('postModal').classList.add('hidden'); document.getElementById('postModal').classList.remove('flex'); document.getElementById('postImage').value = ''; document.getElementById('postTitle').value = ''; document.getElementById('imagePreview').classList.add('hidden'); }
+        
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setSession(username, role) {
+            currentUser = username;
+            currentRole = role;
+            localStorage.setItem('auraCurrentUsername', username);
+            localStorage.setItem('auraUserRole', role);
+            showApp();
+            listenToDatabase();
+        }
+
+        function logout() {
+            currentUser = null;
+            currentRole = 'user';
+            localStorage.removeItem('auraCurrentUsername');
+            localStorage.removeItem('auraUserRole');
+            document.getElementById('btnRegister').innerText = "Join Community";
+            document.getElementById('btnLogin').innerText = "Sign In";
+            document.getElementById('btnAdmin').innerText = "Access System";
+            showAuth();
+        }
+
+        // ==========================================
+        // 2. FIREBASE DATABASE LOGIC
+        // ==========================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, increment, getDocs, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // YOUR SPECIFIC FIREBASE KEYS INSERTED HERE:
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxOkJCEhx55h7PLplm8nlNS9_SHUxTIus",
+            authDomain: "auraboards-1c31e.firebaseapp.com",
+            projectId: "auraboards-1c31e",
+            storageBucket: "auraboards-1c31e.firebasestorage.app",
+            messagingSenderId: "212939099629",
+            appId: "1:212939099629:web:0061387481e930c072abe4",
+            measurementId: "G-EW0X0379DE"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        if(currentUser) { listenToDatabase(); }
+
+        async function handleAuth(event, type) {
+            event.preventDefault();
+            const errorBox = document.getElementById('authError');
+            errorBox.classList.add('hidden');
+
+            try {
+                if (type === 'register') {
+                    const user = document.getElementById('regUser').value.trim();
+                    const pass = document.getElementById('regPass').value.trim();
+                    document.getElementById('btnRegister').innerText = "Creating...";
+                    
+                    const q = query(collection(db, "users"), where("username", "==", user));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) { throw new Error("Username already taken!"); }
+
+                    await addDoc(collection(db, "users"), { username: user, password: pass, role: 'user' });
+                    setSession(user, 'user');
+
+                } else if (type === 'login') {
+                    const user = document.getElementById('loginUser').value.trim();
+                    const pass = document.getElementById('loginPass').value.trim();
+                    document.getElementById('btnLogin').innerText = "Verifying...";
+                    
+                    const q = query(collection(db, "users"), where("username", "==", user), where("password", "==", pass), where("role", "==", "user"));
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (querySnapshot.empty) throw new Error("Invalid User Credentials");
+                    setSession(user, 'user');
+
+                } else if (type === 'admin') {
+                    const user = document.getElementById('adminUser').value.trim();
+                    const pass = document.getElementById('adminPass').value.trim();
+                    document.getElementById('btnAdmin').innerText = "Verifying...";
+                    
+                    if (user === 'admin' && pass === 'admin123') {
+                        setSession('Administrator', 'admin');
+                    } else {
+                        throw new Error("Invalid Admin Credentials");
+                    }
+                }
+            } catch (error) {
+                errorBox.innerText = error.message;
+                errorBox.classList.remove('hidden');
+                document.getElementById('btnRegister').innerText = "Join Community";
+                document.getElementById('btnLogin').innerText = "Sign In";
+                document.getElementById('btnAdmin').innerText = "Access System";
+            }
+        }
+
+        async function handlePostSubmit(event) {
+            event.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Publishing to Cloud...";
+            btn.disabled = true;
+
+            const fileInput = document.getElementById('postImage');
+            const title = document.getElementById('postTitle').value;
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        await addDoc(collection(db, "posts"), {
+                            author: currentUser,
+                            title: title,
+                            image: e.target.result, 
+                            upvotes: 1, 
+                            timestamp: new Date().toISOString()
+                        });
+                        closePostModal();
+                    } catch (error) {
+                        alert("Error: " + error.message);
+                    } finally {
+                        btn.innerText = "Publish to Board";
+                        btn.disabled = false;
+                    }
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        function listenToDatabase() {
+            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+            
+            onSnapshot(q, (querySnapshot) => {
+                const grid = document.getElementById('masonryGrid');
